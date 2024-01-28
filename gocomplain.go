@@ -250,7 +250,7 @@ func LineLength(threshold uint, src ...map[string][]string) {
 	}
 }
 
-// Misspell will look for spelling errors in proviced Go source files.
+// Misspell will look for spelling errors in provided Go source files.
 func Misspell(src ...map[string][]string) {
 	var cmd []string
 	var e error
