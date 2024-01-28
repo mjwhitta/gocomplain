@@ -149,6 +149,7 @@ func run(tools []string, src ...map[string][]string) {
 		case "line-length":
 			gocomplain.LineLength(flags.length, src...)
 		case "spellcheck":
+			gocomplain.Misspell(src...)
 			gocomplain.SpellCheck(flags.ignore, flags.skip, src...)
 		case "staticcheck":
 			if inMod {

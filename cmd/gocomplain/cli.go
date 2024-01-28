@@ -57,7 +57,9 @@ func init() {
 		"GoComplain combines multiple other Go source analyzing",
 		"tools. Currently supported functionality includes: gocyclo,",
 		"gofmt, gofumpt, golint, go vet, ineffassign, line-length",
-		"verification, spellcheck, and staticcheck.",
+		"verification, spellcheck, and staticcheck. The spellcheck",
+		"functionality uses the misspell Go module as well as",
+		"codespell on Linux and macOS.",
 	)
 	cli.Section(
 		"ACTIONS - COMMANDS",
@@ -88,6 +90,7 @@ func init() {
 		"gofumpt",
 		"golint",
 		"ineffassign",
+		"misspell",
 		"staticcheck",
 	}
 	cli.Title = "GoComplain"

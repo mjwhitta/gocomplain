@@ -69,7 +69,7 @@ func GoCyclo(over uint, src ...map[string][]string) {
 	var o string = strconv.Itoa(int(over))
 	var stdout string
 
-	log.Info("Checking code complexity...")
+	log.Info("Checking code complexity (gocyclo)...")
 
 	if len(src) == 0 {
 		return
@@ -99,7 +99,7 @@ func GoFmt() {
 	var e error
 	var stdout string
 
-	log.Info("Formatting code...")
+	log.Info("Formatting code (gofmt)...")
 
 	if stdout, e = execute(cmd); e != nil {
 		log.Err(e.Error())
@@ -116,7 +116,7 @@ func GoFumpt() {
 	var e error
 	var stdout string
 
-	log.Info("Optimizing code...")
+	log.Info("Optimizing code (gofumpt)...")
 
 	if stdout, e = execute(cmd); e != nil {
 		log.Err(e.Error())
@@ -134,7 +134,7 @@ func GoLint(minConf float64) {
 	var e error
 	var stdout string
 
-	log.Info("Linting code...")
+	log.Info("Linting code (golint)...")
 
 	if minConf == 0.8 {
 		cmd = []string{"golint", "./..."}
@@ -157,7 +157,7 @@ func GoLint(minConf float64) {
 func GoVet(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Vetting code...")
+	log.Info("Vetting code (go vet)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -175,12 +175,12 @@ func GoVet(src ...map[string][]string) {
 	}
 }
 
-// IneffAssign will analyze all packages for any inefficiant variable
+// IneffAssign will analyze all packages for any inefficient variable
 // assignments.
 func IneffAssign(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Looking for inefficient assignments...")
+	log.Info("Looking for inefficient assignments (ineffassign)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -250,6 +250,32 @@ func LineLength(threshold uint, src ...map[string][]string) {
 	}
 }
 
+// Misspell will look for spelling errors in proviced Go source files.
+func Misspell(src ...map[string][]string) {
+	var cmd []string
+	var e error
+	var stdout string
+
+	log.Info("Checking spelling (misspell)...")
+
+	for i := range src {
+		for dir, files := range src[i] {
+			cmd = []string{"misspell"}
+			for _, fn := range files {
+				cmd = append(cmd, filepath.Join(dir, fn))
+			}
+
+			if stdout, e = execute(cmd); e != nil {
+				log.Err(e.Error())
+			} else if stdout != "" {
+				for _, ln := range strings.Split(stdout, "\n") {
+					log.Warn(ln)
+				}
+			}
+		}
+	}
+}
+
 // SpellCheck will run the appropriate tool for the current OS and
 // check for spelling errors in the provided Go source files.
 func SpellCheck(
@@ -257,7 +283,7 @@ func SpellCheck(
 ) {
 	var cmd []string
 
-	log.Info("Running spellcheck...")
+	log.Info("Checking spelling (codespell)...")
 
 	switch runtime.GOOS {
 	case "darwin", "linux":
@@ -285,7 +311,7 @@ func SpellCheck(
 func StaticCheck(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Running static analysis...")
+	log.Info("Running static analysis (staticcheck)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -317,17 +343,19 @@ func UpdateInstall() {
 	var found bool
 	var stdout string
 	var tools map[string]string = map[string]string{
-		"gocyclo":     "github.com/fzipp/gocyclo/cmd/gocyclo@latest",
-		"gofumpt":     "mvdan.cc/gofumpt@latest",
-		"golint":      "golang.org/x/lint/golint@latest",
-		"ineffassign": "github.com/gordonklaus/ineffassign@latest",
-		"staticcheck": "honnef.co/go/tools/cmd/staticcheck@latest",
+		"gocyclo":     "github.com/fzipp/gocyclo/cmd/gocyclo",
+		"gofumpt":     "mvdan.cc/gofumpt",
+		"golint":      "golang.org/x/lint/golint",
+		"ineffassign": "github.com/gordonklaus/ineffassign",
+		"misspell":    "github.com/client9/misspell/cmd/misspell",
+		"staticcheck": "honnef.co/go/tools/cmd/staticcheck",
 	}
 
 	log.Info("Installing newest versions of each tool...")
 	for name, tool := range tools {
 		log.SubInfof("%s...", name)
-		if stdout, e = execute(append(cmd, tool)); e != nil {
+		stdout, e = execute(append(cmd, tool+"@latest"))
+		if e != nil {
 			log.Err(e.Error())
 		} else if stdout != "" {
 			for _, ln := range strings.Split(stdout, "\n") {
