@@ -10,13 +10,18 @@
 This module attempts to combine multiple other Go source analyzing
 tools. Currently supported functionality includes:
 
-- go vet
-- gocyclo
-- gofmt
-- gofumpt
-- golint
-- ineffassign
-- spellcheck
+- Go analyzers
+    - go vet
+    - gocyclo
+    - golint
+    - ineffassign
+    - staticcheck
+- Go formatting
+    - gofmt
+    - gofumpt
+    - line-length verification
+- Spelling
+    - spellcheck
 
 ## How to install
 
