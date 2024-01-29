@@ -64,66 +64,28 @@ func FindSrcFiles(
 // GoCyclo will analyze the provided Go source files for any functions
 // that are overly complex.
 func GoCyclo(over uint) {
-	var cmd []string
-	var e error
 	var o string = strconv.Itoa(int(over))
-	var stdout string
 
 	log.Info("Checking code complexity (gocyclo)...")
-
-	cmd = []string{"gocyclo", "--over", o, "."}
-
-	if stdout, e = execute(cmd); e != nil {
-		log.Err(e.Error())
-	} else if stdout != "" {
-		for _, ln := range strings.Split(stdout, "\n") {
-			log.Warn(ln)
-		}
-	}
+	runOutput([]string{"gocyclo", "--over", o, "."}, false)
 }
 
 // GoFmt will format and simplify all Go source files.
 func GoFmt() {
-	var cmd []string = []string{"gofmt", "-l", "-s", "-w", "."}
-	var e error
-	var stdout string
-
 	log.Info("Formatting code (gofmt)...")
-
-	if stdout, e = execute(cmd); e != nil {
-		log.Err(e.Error())
-	} else if stdout != "" {
-		for _, ln := range strings.Split(stdout, "\n") {
-			log.Warn(ln)
-		}
-	}
+	runOutput([]string{"gofmt", "-l", "-s", "-w", "."}, false)
 }
 
 // GoFumpt will format and optimize all Go source files.
 func GoFumpt() {
-	var cmd []string = []string{"gofumpt", "-e", "-l", "-w", "."}
-	var e error
-	var stdout string
-
 	log.Info("Optimizing code (gofumpt)...")
-
-	if stdout, e = execute(cmd); e != nil {
-		log.Err(e.Error())
-	} else if stdout != "" {
-		for _, ln := range strings.Split(stdout, "\n") {
-			log.Warn(ln)
-		}
-	}
+	runOutput([]string{"gofumpt", "-e", "-l", "-w", "."}, false)
 }
 
 // GoLint will lint all packages.
 func GoLint(minConf float64) {
 	var c string = strconv.FormatFloat(minConf, 'f', -1, 64)
 	var cmd []string = []string{"golint"}
-	var e error
-	var stdout string
-
-	log.Info("Linting code (golint)...")
 
 	if minConf != 0.8 {
 		cmd = append(cmd, "-min_confidence", c)
@@ -131,15 +93,8 @@ func GoLint(minConf float64) {
 
 	cmd = append(cmd, "./...")
 
-	if stdout, e = execute(cmd); e != nil {
-		if !nonModule.MatchString(e.Error()) {
-			log.Err(e.Error())
-		}
-	} else if stdout != "" {
-		for _, ln := range strings.Split(stdout, "\n") {
-			log.Warn(ln)
-		}
-	}
+	log.Info("Linting code (golint)...")
+	runOutput(cmd, false)
 }
 
 // GoVet will vet all packages.
@@ -156,11 +111,11 @@ func GoVet(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd, 0)
+				runOutput(cmd, true, 0)
 			}
 		}
 	} else {
-		runOutput([]string{"go", "vet", "./..."}, 0)
+		runOutput([]string{"go", "vet", "./..."}, true, 0)
 	}
 }
 
@@ -179,11 +134,11 @@ func IneffAssign(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd)
+				runOutput(cmd, true)
 			}
 		}
 	} else {
-		runOutput([]string{"ineffassign", "./..."})
+		runOutput([]string{"ineffassign", "./..."}, true)
 	}
 }
 
@@ -240,20 +195,16 @@ func LineLength(threshold uint, src ...map[string][]string) {
 }
 
 // Misspell will look for spelling errors in provided Go source files.
-func Misspell(src ...map[string][]string) {
-	var cmd []string = []string{"misspell", "."}
-	var e error
-	var stdout string
+func Misspell(ignore []string) {
+	var cmd []string = []string{"misspell"}
+
+	if len(ignore) > 0 {
+		cmd = append(cmd, "-i", strings.Join(ignore, ","))
+	}
+	cmd = append(cmd, ".")
 
 	log.Info("Checking spelling (misspell)...")
-
-	if stdout, e = execute(cmd); e != nil {
-		log.Err(e.Error())
-	} else if stdout != "" {
-		for _, ln := range strings.Split(stdout, "\n") {
-			log.Warn(ln)
-		}
-	}
+	runOutput(cmd, false)
 }
 
 // SpellCheck will run the appropriate tool for the current OS and
@@ -279,7 +230,7 @@ func SpellCheck(
 		skip = append(skip, ".git", "*.pem", "go.mod", "go.sum")
 		cmd = append(cmd, "-S", strings.Join(skip, ","))
 
-		runOutput(cmd)
+		runOutput(cmd, true)
 	// case "windows":
 	// TODO find spellcheck tool for windows (codespell?)
 	default:
@@ -301,11 +252,11 @@ func StaticCheck(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd, 0)
+				runOutput(cmd, true, 0)
 			}
 		}
 	} else {
-		runOutput([]string{"staticcheck", "./..."}, 0)
+		runOutput([]string{"staticcheck", "./..."}, true, 0)
 	}
 }
 
@@ -319,9 +270,7 @@ func UpdateInstall() {
 		"--ldflags=-s -w",
 		"--trimpath",
 	}
-	var e error
 	var found bool
-	var stdout string
 	var tools [][]string = [][]string{
 		{"gocyclo", "github.com/fzipp/gocyclo/cmd/gocyclo"},
 		{"gofumpt", "mvdan.cc/gofumpt"},
@@ -334,14 +283,7 @@ func UpdateInstall() {
 	log.Info("Installing newest versions of each tool...")
 	for _, tool := range tools {
 		log.SubInfof("%s...", tool[0])
-		stdout, e = execute(append(cmd, tool[1]+"@latest"))
-		if e != nil {
-			log.Err(e.Error())
-		} else if stdout != "" {
-			for _, ln := range strings.Split(stdout, "\n") {
-				log.Warn(ln)
-			}
-		}
+		runOutput(append(cmd, tool[1]+"@latest"), false)
 	}
 
 	switch runtime.GOOS {

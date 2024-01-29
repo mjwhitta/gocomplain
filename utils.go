@@ -38,9 +38,10 @@ func execute(cmd []string) (string, error) {
 	return strings.TrimSuffix(string(b), "\n"), nil
 }
 
-func runOutput(cmd []string, skip ...int) {
+func runOutput(cmd []string, onlyWarn bool, skip ...int) {
 	var cwd string
 	var e error
+	var isErr bool
 	var out string
 	var stdout string
 	var trim []string
@@ -50,6 +51,7 @@ func runOutput(cmd []string, skip ...int) {
 	}
 
 	if stdout, e = execute(cmd); e != nil {
+		isErr = true
 		out = e.Error()
 	} else {
 		out = stdout
@@ -58,7 +60,7 @@ func runOutput(cmd []string, skip ...int) {
 	// Exit, if no usable output
 	if out == "" {
 		return
-	} else if nonModule.MatchString(out) {
+	} else if rIgnoredErr.MatchString(out) {
 		return
 	}
 
@@ -79,6 +81,10 @@ func runOutput(cmd []string, skip ...int) {
 			ln = strings.TrimPrefix(ln, prefix)
 		}
 
-		log.Warn(ln)
+		if !onlyWarn && isErr {
+			log.Err(ln)
+		} else {
+			log.Warn(ln)
+		}
 	}
 }

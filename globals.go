@@ -1,6 +1,9 @@
 package gocomplain
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 // Debug will turn on printing of executed sub-processes.
 var Debug bool
@@ -9,8 +12,13 @@ var (
 	generated *regexp.Regexp = regexp.MustCompile(
 		`^//\sCode\sgenerated\s.*\sDO\sNOT\sEDIT\.$`,
 	)
-	nonModule *regexp.Regexp = regexp.MustCompile(
-		`does not contain main module|matched no packages`,
+	ignoredErrs []string = []string{
+		"does not contain main module",
+		"matched no packages",
+		"-buildvcs=false to disable VCS stamping.",
+	}
+	rIgnoredErr *regexp.Regexp = regexp.MustCompile(
+		strings.Join(ignoredErrs, "|"),
 	)
 )
 
@@ -31,4 +39,4 @@ var pkgMgrs = [][]string{
 }
 
 // Version is the package version.
-const Version = "0.4.1"
+const Version = "0.4.2"

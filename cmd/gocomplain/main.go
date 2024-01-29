@@ -84,6 +84,7 @@ func main() {
 		}
 	}()
 
+	var count int
 	var e error
 	var src map[string][]string
 	var tests map[string][]string
@@ -97,20 +98,21 @@ func main() {
 		panic(e)
 	}
 
-	if cli.NArg() == 0 {
-		tools = all
-	}
-
 	for _, arg := range cli.Args() {
 		if ok := isCmd(arg); ok {
 			// Do nothing
 		} else if ok, add := isEnv(arg); ok {
 			tools = append(tools, add...)
 		} else if ok, add := isTool(arg); ok {
+			count++
 			tools = append(tools, add...)
 		} else {
 			cli.Usage(InvalidArgument)
 		}
+	}
+
+	if count == 0 {
+		tools = append(tools, all...)
 	}
 
 	if len(tools) > 0 {
@@ -125,6 +127,7 @@ func run(tools []string, src ...map[string][]string) {
 	for _, tool := range tools {
 		switch tool {
 		case "darwin", "linux", "windows":
+			log.Infof("Setting GOOS to %s", tool)
 			os.Setenv("GOOS", tool)
 		case "gocyclo":
 			gocomplain.GoCyclo(flags.over)
@@ -149,7 +152,7 @@ func run(tools []string, src ...map[string][]string) {
 		case "line-length":
 			gocomplain.LineLength(flags.length, src...)
 		case "spellcheck":
-			gocomplain.Misspell()
+			gocomplain.Misspell(flags.ignore)
 			gocomplain.SpellCheck(flags.ignore, flags.skip, src...)
 		case "staticcheck":
 			if inMod {
