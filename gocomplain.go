@@ -322,19 +322,19 @@ func UpdateInstall() {
 	var e error
 	var found bool
 	var stdout string
-	var tools map[string]string = map[string]string{
-		"gocyclo":     "github.com/fzipp/gocyclo/cmd/gocyclo",
-		"gofumpt":     "mvdan.cc/gofumpt",
-		"golint":      "golang.org/x/lint/golint",
-		"ineffassign": "github.com/gordonklaus/ineffassign",
-		"misspell":    "github.com/client9/misspell/cmd/misspell",
-		"staticcheck": "honnef.co/go/tools/cmd/staticcheck",
+	var tools [][]string = [][]string{
+		{"gocyclo", "github.com/fzipp/gocyclo/cmd/gocyclo"},
+		{"gofumpt", "mvdan.cc/gofumpt"},
+		{"golint", "golang.org/x/lint/golint"},
+		{"ineffassign", "github.com/gordonklaus/ineffassign"},
+		{"misspell", "github.com/client9/misspell/cmd/misspell"},
+		{"staticcheck", "honnef.co/go/tools/cmd/staticcheck"},
 	}
 
 	log.Info("Installing newest versions of each tool...")
-	for name, tool := range tools {
-		log.SubInfof("%s...", name)
-		stdout, e = execute(append(cmd, tool+"@latest"))
+	for _, tool := range tools {
+		log.SubInfof("%s...", tool[0])
+		stdout, e = execute(append(cmd, tool[1]+"@latest"))
 		if e != nil {
 			log.Err(e.Error())
 		} else if stdout != "" {
