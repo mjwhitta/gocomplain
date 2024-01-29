@@ -21,6 +21,7 @@ tools. Currently supported functionality includes:
     - gofumpt
     - line-length verification
 - Spelling
+    - misspell
     - spellcheck
 
 ## How to install

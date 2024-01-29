@@ -22,16 +22,16 @@ const (
 
 // Flags
 var flags struct {
-	debug   bool
-	ignore  cli.StringList
-	length  uint
-	minConf float64
-	nocolor bool
-	over    uint
-	prune   cli.StringList
-	skip    cli.StringList
-	verbose bool
-	version bool
+	confidence float64
+	debug      bool
+	ignore     cli.StringList
+	length     uint
+	nocolor    bool
+	over       uint
+	prune      cli.StringList
+	skip       cli.StringList
+	verbose    bool
+	version    bool
 }
 
 func init() {
@@ -97,6 +97,14 @@ func init() {
 
 	// Parse cli flags
 	cli.Flag(
+		&flags.confidence,
+		"c",
+		"confidence",
+		0.8,
+		"Only complain about golint problems with specified minimum",
+		"confidence (default: 0.8).",
+	)
+	cli.Flag(
 		&flags.debug,
 		"d",
 		"debug",
@@ -118,13 +126,6 @@ func init() {
 		"Set max length of source code lines (default: 70).",
 	)
 	cli.Flag(
-		&flags.minConf,
-		"m",
-		"min",
-		0.8,
-		"Minimum confidence of a golint problem (default: 0.8).",
-	)
-	cli.Flag(
 		&flags.nocolor,
 		"no-color",
 		false,
@@ -135,7 +136,8 @@ func init() {
 		"o",
 		"over",
 		15,
-		"Complain about overly complex functions (default: 15).",
+		"Only complain about functions over specified complexity",
+		"(default: 15).",
 	)
 	cli.Flag(
 		&flags.prune,

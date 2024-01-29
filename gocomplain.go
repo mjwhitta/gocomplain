@@ -63,7 +63,7 @@ func FindSrcFiles(
 
 // GoCyclo will analyze the provided Go source files for any functions
 // that are overly complex.
-func GoCyclo(over uint, src ...map[string][]string) {
+func GoCyclo(over uint) {
 	var cmd []string
 	var e error
 	var o string = strconv.Itoa(int(over))
@@ -71,20 +71,13 @@ func GoCyclo(over uint, src ...map[string][]string) {
 
 	log.Info("Checking code complexity (gocyclo)...")
 
-	for i := range src {
-		for dir, files := range src[i] {
-			cmd = []string{"gocyclo", "--over", o}
-			for _, fn := range files {
-				cmd = append(cmd, filepath.Join(dir, fn))
-			}
+	cmd = []string{"gocyclo", "--over", o, "."}
 
-			if stdout, e = execute(cmd); e != nil {
-				log.Err(e.Error())
-			} else if stdout != "" {
-				for _, ln := range strings.Split(stdout, "\n") {
-					log.Warn(ln)
-				}
-			}
+	if stdout, e = execute(cmd); e != nil {
+		log.Err(e.Error())
+	} else if stdout != "" {
+		for _, ln := range strings.Split(stdout, "\n") {
+			log.Warn(ln)
 		}
 	}
 }
@@ -126,17 +119,17 @@ func GoFumpt() {
 // GoLint will lint all packages.
 func GoLint(minConf float64) {
 	var c string = strconv.FormatFloat(minConf, 'f', -1, 64)
-	var cmd []string
+	var cmd []string = []string{"golint"}
 	var e error
 	var stdout string
 
 	log.Info("Linting code (golint)...")
 
-	if minConf == 0.8 {
-		cmd = []string{"golint", "./..."}
-	} else {
-		cmd = []string{"golint", "-min_confidence", c, "./..."}
+	if minConf != 0.8 {
+		cmd = append(cmd, "-min_confidence", c)
 	}
+
+	cmd = append(cmd, "./...")
 
 	if stdout, e = execute(cmd); e != nil {
 		if !nonModule.MatchString(e.Error()) {

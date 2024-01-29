@@ -127,13 +127,13 @@ func run(tools []string, src ...map[string][]string) {
 		case "darwin", "linux", "windows":
 			os.Setenv("GOOS", tool)
 		case "gocyclo":
-			gocomplain.GoCyclo(flags.over, src...)
+			gocomplain.GoCyclo(flags.over)
 		case "gofmt":
 			gocomplain.GoFmt()
 		case "gofumpt":
 			gocomplain.GoFumpt()
 		case "golint":
-			gocomplain.GoLint(flags.minConf)
+			gocomplain.GoLint(flags.confidence)
 		case "govet":
 			if inMod {
 				gocomplain.GoVet()
@@ -149,7 +149,7 @@ func run(tools []string, src ...map[string][]string) {
 		case "line-length":
 			gocomplain.LineLength(flags.length, src...)
 		case "spellcheck":
-			gocomplain.Misspell(src...)
+			gocomplain.Misspell()
 			gocomplain.SpellCheck(flags.ignore, flags.skip, src...)
 		case "staticcheck":
 			if inMod {
