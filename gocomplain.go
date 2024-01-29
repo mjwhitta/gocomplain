@@ -71,10 +71,6 @@ func GoCyclo(over uint, src ...map[string][]string) {
 
 	log.Info("Checking code complexity (gocyclo)...")
 
-	if len(src) == 0 {
-		return
-	}
-
 	for i := range src {
 		for dir, files := range src[i] {
 			cmd = []string{"gocyclo", "--over", o}
@@ -252,26 +248,17 @@ func LineLength(threshold uint, src ...map[string][]string) {
 
 // Misspell will look for spelling errors in provided Go source files.
 func Misspell(src ...map[string][]string) {
-	var cmd []string
+	var cmd []string = []string{"misspell", "."}
 	var e error
 	var stdout string
 
 	log.Info("Checking spelling (misspell)...")
 
-	for i := range src {
-		for dir, files := range src[i] {
-			cmd = []string{"misspell"}
-			for _, fn := range files {
-				cmd = append(cmd, filepath.Join(dir, fn))
-			}
-
-			if stdout, e = execute(cmd); e != nil {
-				log.Err(e.Error())
-			} else if stdout != "" {
-				for _, ln := range strings.Split(stdout, "\n") {
-					log.Warn(ln)
-				}
-			}
+	if stdout, e = execute(cmd); e != nil {
+		log.Err(e.Error())
+	} else if stdout != "" {
+		for _, ln := range strings.Split(stdout, "\n") {
+			log.Warn(ln)
 		}
 	}
 }
