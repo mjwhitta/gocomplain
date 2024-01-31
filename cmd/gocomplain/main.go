@@ -100,7 +100,7 @@ func main() {
 
 	for _, arg := range cli.Args() {
 		if ok := isCmd(arg); ok {
-			// Do nothing
+			os.Exit(Good)
 		} else if ok, add := isEnv(arg); ok {
 			tools = append(tools, add...)
 		} else if ok, add := isTool(arg); ok {
