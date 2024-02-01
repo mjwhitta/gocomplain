@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Debug will turn on printing of executed sub-processes.
+// Debug will turn on debug log messages.
 var Debug bool
 
 var (
@@ -38,5 +38,8 @@ var pkgMgrs = [][]string{
 	{"yum", "sudo yum install codespell"},
 }
 
+// Quiet can be used to disable information log messages.
+var Quiet bool
+
 // Version is the package version.
-const Version = "0.4.3"
+const Version = "0.5.0"

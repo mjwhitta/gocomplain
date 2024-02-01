@@ -24,6 +24,12 @@ var all []string = []string{
 
 var inMod bool
 
+func infof(str string, args ...any) {
+	if !flags.quiet {
+		log.Infof(str, args...)
+	}
+}
+
 func isCmd(arg string) bool {
 	switch arg {
 	case "i", "install", "u", "update", "upgrade":
@@ -93,6 +99,7 @@ func main() {
 	validate()
 
 	gocomplain.Debug = flags.debug
+	gocomplain.Quiet = flags.quiet
 
 	if inMod, e = setup(); e != nil {
 		panic(e)
@@ -120,14 +127,16 @@ func main() {
 		run(tools, src, tests)
 	}
 
-	log.Good("Done")
+	if !flags.quiet {
+		log.Good("Done")
+	}
 }
 
 func run(tools []string, src ...map[string][]string) {
 	for _, tool := range tools {
 		switch tool {
 		case "darwin", "linux", "windows":
-			log.Infof("Setting GOOS to %s", tool)
+			infof("Setting GOOS to %s", tool)
 			os.Setenv("GOOS", tool)
 		case "gocyclo":
 			gocomplain.GoCyclo(flags.over)

@@ -29,6 +29,7 @@ var flags struct {
 	nocolor    bool
 	over       uint
 	prune      cli.StringList
+	quiet      bool
 	skip       cli.StringList
 	verbose    bool
 	version    bool
@@ -144,6 +145,13 @@ func init() {
 		"p",
 		"prune",
 		"Prune directories/files when analyzing source files.",
+	)
+	cli.Flag(
+		&flags.quiet,
+		"q",
+		"quiet",
+		false,
+		"Hide information log messages.",
 	)
 	cli.Flag(
 		&flags.skip,

@@ -38,6 +38,12 @@ func execute(cmd []string) (string, error) {
 	return strings.TrimSuffix(string(b), "\n"), nil
 }
 
+func info(str string) {
+	if !Quiet {
+		log.Info(str)
+	}
+}
+
 func runOutput(cmd []string, onlyWarn bool, skip ...int) {
 	var cwd string
 	var e error
@@ -86,5 +92,11 @@ func runOutput(cmd []string, onlyWarn bool, skip ...int) {
 		} else {
 			log.Warn(ln)
 		}
+	}
+}
+
+func subInfof(str string, args ...any) {
+	if !Quiet {
+		log.SubInfof(str, args...)
 	}
 }

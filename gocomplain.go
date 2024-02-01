@@ -66,19 +66,19 @@ func FindSrcFiles(
 func GoCyclo(over uint) {
 	var o string = strconv.Itoa(int(over))
 
-	log.Info("Checking code complexity (gocyclo)...")
+	info("Checking code complexity (gocyclo)...")
 	runOutput([]string{"gocyclo", "--over", o, "."}, false)
 }
 
 // GoFmt will format and simplify all Go source files.
 func GoFmt() {
-	log.Info("Formatting code (gofmt)...")
+	info("Formatting code (gofmt)...")
 	runOutput([]string{"gofmt", "-l", "-s", "-w", "."}, false)
 }
 
 // GoFumpt will format and optimize all Go source files.
 func GoFumpt() {
-	log.Info("Optimizing code (gofumpt)...")
+	info("Optimizing code (gofumpt)...")
 	runOutput([]string{"gofumpt", "-e", "-l", "-w", "."}, false)
 }
 
@@ -93,7 +93,7 @@ func GoLint(minConf float64) {
 
 	cmd = append(cmd, "./...")
 
-	log.Info("Linting code (golint)...")
+	info("Linting code (golint)...")
 	runOutput(cmd, false)
 }
 
@@ -101,7 +101,7 @@ func GoLint(minConf float64) {
 func GoVet(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Vetting code (go vet)...")
+	info("Vetting code (go vet)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -124,7 +124,7 @@ func GoVet(src ...map[string][]string) {
 func IneffAssign(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Looking for inefficient assignments (ineffassign)...")
+	info("Looking for inefficient assignments (ineffassign)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -151,7 +151,7 @@ func LineLength(threshold uint, src ...map[string][]string) {
 	var lno int
 	var s *bufio.Scanner
 
-	log.Info("Checking for improper line-length...")
+	info("Checking for improper line-length...")
 
 	for i := range src {
 		for dir, files := range src[i] {
@@ -203,7 +203,7 @@ func Misspell(ignore []string) {
 	}
 	cmd = append(cmd, ".")
 
-	log.Info("Checking spelling (misspell)...")
+	info("Checking spelling (misspell)...")
 	runOutput(cmd, false)
 }
 
@@ -214,7 +214,7 @@ func SpellCheck(
 ) {
 	var cmd []string
 
-	log.Info("Checking spelling (codespell)...")
+	info("Checking spelling (codespell)...")
 
 	switch runtime.GOOS {
 	case "darwin", "linux":
@@ -242,7 +242,7 @@ func SpellCheck(
 func StaticCheck(src ...map[string][]string) {
 	var cmd []string
 
-	log.Info("Running static analysis (staticcheck)...")
+	info("Running static analysis (staticcheck)...")
 
 	if len(src) > 0 {
 		for i := range src {
@@ -280,9 +280,9 @@ func UpdateInstall() {
 		{"staticcheck", "honnef.co/go/tools/cmd/staticcheck"},
 	}
 
-	log.Info("Installing newest versions of each tool...")
+	info("Installing newest versions of each tool...")
 	for _, tool := range tools {
-		log.SubInfof("%s...", tool[0])
+		subInfof("%s...", tool[0])
 		runOutput(append(cmd, tool[1]+"@latest"), false)
 	}
 
