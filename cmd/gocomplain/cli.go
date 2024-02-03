@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/mjwhitta/cli"
 	"github.com/mjwhitta/gocomplain"
@@ -172,6 +173,8 @@ func init() {
 
 // Process cli flags and ensure no issues
 func validate() {
+	var tmp []string
+
 	hl.Disable(flags.nocolor)
 
 	for _, arg := range cli.Args() {
@@ -199,4 +202,22 @@ func validate() {
 		hl.Printf("gocomplain version %s\n", gocomplain.Version)
 		os.Exit(Good)
 	}
+
+	// Fix string lists
+	for _, ignore := range flags.ignore {
+		tmp = append(tmp, strings.Split(ignore, ",")...)
+	}
+	flags.ignore = tmp
+
+	tmp = []string{}
+	for _, prune := range flags.prune {
+		tmp = append(tmp, strings.Split(prune, ",")...)
+	}
+	flags.prune = tmp
+
+	tmp = []string{}
+	for _, skip := range flags.skip {
+		tmp = append(tmp, strings.Split(skip, ",")...)
+	}
+	flags.skip = tmp
 }
