@@ -44,16 +44,12 @@ func info(str string) {
 	}
 }
 
-func run(cmd []string, skip ...int) []string {
+func run(cmd []string) []string {
 	var cwd string
 	var e error
 	var out []string
 	var stdout string
 	var trim []string
-
-	if len(skip) == 0 {
-		skip = []int{-1}
-	}
 
 	if stdout, e = execute(cmd); e != nil {
 		stdout = e.Error()
@@ -68,11 +64,7 @@ func run(cmd []string, skip ...int) []string {
 
 	cwd, _ = os.Getwd()
 
-	for i, ln := range strings.Split(stdout, "\n") {
-		if i == skip[0] {
-			continue
-		}
-
+	for _, ln := range strings.Split(stdout, "\n") {
 		// Clean up output
 		trim = []string{"vet: ", "." + string(filepath.Separator)}
 		if cwd != "" {

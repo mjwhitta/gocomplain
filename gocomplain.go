@@ -107,14 +107,14 @@ func GoVet(src ...map[string][]string) []string {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				out = append(out, run(cmd, 0)...)
+				out = append(out, run(cmd)...)
 			}
 		}
 
 		return out
 	}
 
-	return run([]string{"go", "vet", "./..."}, 0)
+	return run([]string{"go", "vet", "./..."})
 }
 
 // IneffAssign will analyze all packages for any inefficient variable
@@ -266,14 +266,14 @@ func StaticCheck(src ...map[string][]string) []string {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				out = append(out, run(cmd, 0)...)
+				out = append(out, run(cmd)...)
 			}
 		}
 
 		return out
 	}
 
-	return run([]string{"staticcheck", "./..."}, 0)
+	return run([]string{"staticcheck", "./..."})
 }
 
 // UpdateInstall will install the newest versions of the underlying
