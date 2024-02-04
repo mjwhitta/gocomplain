@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/mjwhitta/cli"
@@ -72,16 +73,19 @@ func init() {
 	)
 	cli.Section(
 		"ACTIONS - ENV",
-		"darwin, linux, windows\nUse specified GOOS.\n\n",
-		"d, l, w\nShorthand for associated GOOS.",
+		"allos\nCheck all supported GOOS.\n\n",
+		"darwin, linux, windows (default: "+runtime.GOOS+")\n",
+		"Check the specified GOOS.\n\n",
+		"ao, d, l, w\nShorthand for associated GOOS.",
 	)
 	cli.Section(
 		"ACTIONS - TOOLS",
-		"a, all (default)\nRun default tools.\n\n",
+		"alltools (default)\nRun all tools.\n\n",
 		"gocyclo, gofmt, gofumpt, golint, govet, ineffassign,",
 		"line-length, spellcheck, staticheck\n",
 		"Run the specified tool.\n\n",
-		"cyclo, fmt, fumpt, lint, vet, ineff, ll, spell, static\n",
+		"at, cyclo, fmt, fumpt, lint, vet, ineff, ll, spell, static",
+		"\n",
 		"Shorthand for associated tools.",
 	)
 	cli.SeeAlso = []string{

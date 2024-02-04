@@ -44,11 +44,10 @@ func info(str string) {
 	}
 }
 
-func runOutput(cmd []string, onlyWarn bool, skip ...int) {
+func run(cmd []string, skip ...int) []string {
 	var cwd string
 	var e error
-	var isErr bool
-	var out string
+	var out []string
 	var stdout string
 	var trim []string
 
@@ -57,22 +56,19 @@ func runOutput(cmd []string, onlyWarn bool, skip ...int) {
 	}
 
 	if stdout, e = execute(cmd); e != nil {
-		isErr = true
-		out = e.Error()
-	} else {
-		out = stdout
+		stdout = e.Error()
 	}
 
 	// Exit, if no usable output
-	if out == "" {
-		return
-	} else if rIgnoredErr.MatchString(out) {
-		return
+	if stdout == "" {
+		return nil
+	} else if rIgnoredErr.MatchString(stdout) {
+		return nil
 	}
 
 	cwd, _ = os.Getwd()
 
-	for i, ln := range strings.Split(out, "\n") {
+	for i, ln := range strings.Split(stdout, "\n") {
 		if i == skip[0] {
 			continue
 		}
@@ -87,12 +83,10 @@ func runOutput(cmd []string, onlyWarn bool, skip ...int) {
 			ln = strings.TrimPrefix(ln, prefix)
 		}
 
-		if !onlyWarn && isErr {
-			log.Err(ln)
-		} else {
-			log.Warn(ln)
-		}
+		out = append(out, ln)
 	}
+
+	return out
 }
 
 func subInfof(str string, args ...any) {

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	hl "github.com/mjwhitta/hilighter"
 	"github.com/mjwhitta/log"
 	"github.com/mjwhitta/where"
 )
@@ -63,27 +64,24 @@ func FindSrcFiles(
 
 // GoCyclo will analyze the provided Go source files for any functions
 // that are overly complex.
-func GoCyclo(over uint) {
-	var o string = strconv.Itoa(int(over))
-
-	info("Checking code complexity (gocyclo)...")
-	runOutput([]string{"gocyclo", "--over", o, "."}, false)
+func GoCyclo(over uint) []string {
+	return run(
+		[]string{"gocyclo", "--over", strconv.Itoa(int(over)), "."},
+	)
 }
 
 // GoFmt will format and simplify all Go source files.
-func GoFmt() {
-	info("Formatting code (gofmt)...")
-	runOutput([]string{"gofmt", "-l", "-s", "-w", "."}, false)
+func GoFmt() []string {
+	return run([]string{"gofmt", "-l", "-s", "-w", "."})
 }
 
 // GoFumpt will format and optimize all Go source files.
-func GoFumpt() {
-	info("Optimizing code (gofumpt)...")
-	runOutput([]string{"gofumpt", "-e", "-l", "-w", "."}, false)
+func GoFumpt() []string {
+	return run([]string{"gofumpt", "-e", "-l", "-w", "."})
 }
 
 // GoLint will lint all packages.
-func GoLint(minConf float64) {
+func GoLint(minConf float64) []string {
 	var c string = strconv.FormatFloat(minConf, 'f', -1, 64)
 	var cmd []string = []string{"golint"}
 
@@ -93,15 +91,13 @@ func GoLint(minConf float64) {
 
 	cmd = append(cmd, "./...")
 
-	info("Linting code (golint)...")
-	runOutput(cmd, false)
+	return run(cmd)
 }
 
 // GoVet will vet all packages.
-func GoVet(src ...map[string][]string) {
+func GoVet(src ...map[string][]string) []string {
 	var cmd []string
-
-	info("Vetting code (go vet)...")
+	var out []string
 
 	if len(src) > 0 {
 		for i := range src {
@@ -111,20 +107,21 @@ func GoVet(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd, true, 0)
+				out = append(out, run(cmd, 0)...)
 			}
 		}
-	} else {
-		runOutput([]string{"go", "vet", "./..."}, true, 0)
+
+		return out
 	}
+
+	return run([]string{"go", "vet", "./..."}, 0)
 }
 
 // IneffAssign will analyze all packages for any inefficient variable
 // assignments.
-func IneffAssign(src ...map[string][]string) {
+func IneffAssign(src ...map[string][]string) []string {
 	var cmd []string
-
-	info("Looking for inefficient assignments (ineffassign)...")
+	var out []string
 
 	if len(src) > 0 {
 		for i := range src {
@@ -134,24 +131,25 @@ func IneffAssign(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd, true)
+				out = append(out, run(cmd)...)
 			}
 		}
-	} else {
-		runOutput([]string{"ineffassign", "./..."}, true)
+
+		return out
 	}
+
+	return run([]string{"ineffassign", "./..."})
 }
 
 // LineLength will analyze the provided Go files for lines that are
 // longer than the provided threshold.
-func LineLength(threshold uint, src ...map[string][]string) {
+func LineLength(threshold uint, src ...map[string][]string) []string {
 	var e error
 	var f *os.File
 	var line string
 	var lno int
+	var out []string
 	var s *bufio.Scanner
-
-	info("Checking for improper line-length...")
 
 	for i := range src {
 		for dir, files := range src[i] {
@@ -160,7 +158,10 @@ func LineLength(threshold uint, src ...map[string][]string) {
 
 				// Open file
 				if f, e = os.Open(fn); e != nil {
-					log.Errf("failed to open %s to read: %s", fn, e)
+					out = append(
+						out,
+						hl.Sprintf("failed to read %s: %s", fn, e),
+					)
 					continue
 				}
 
@@ -180,69 +181,82 @@ func LineLength(threshold uint, src ...map[string][]string) {
 					}
 
 					if ll := len([]rune(line)); ll > int(threshold) {
-						log.Warnf("%s:%d (%d) %s", fn, lno, ll, line)
+						out = append(
+							out,
+							hl.Sprintf(
+								"%s:%d (%d) %s",
+								fn,
+								lno,
+								ll,
+								line,
+							),
+						)
 					}
 				}
 
 				if e = s.Err(); e != nil {
-					log.Errf("failed to read %s: %s", fn, e)
+					out = append(
+						out,
+						hl.Sprintf("failed to read %s: %s", fn, e),
+					)
 				}
 
 				f.Close()
 			}
 		}
 	}
+
+	return out
 }
 
 // Misspell will look for spelling errors in provided Go source files.
-func Misspell(ignore []string) {
+func Misspell(ignore []string) []string {
 	var cmd []string = []string{"misspell"}
 
 	if len(ignore) > 0 {
 		cmd = append(cmd, "-i", strings.Join(ignore, ","))
 	}
+
 	cmd = append(cmd, ".")
 
-	info("Checking spelling (misspell)...")
-	runOutput(cmd, false)
+	return run(cmd)
 }
 
 // SpellCheck will run the appropriate tool for the current OS and
 // check for spelling errors in the provided Go source files.
 func SpellCheck(
 	ignore []string, skip []string, src ...map[string][]string,
-) {
+) []string {
 	var cmd []string
-
-	info("Checking spelling (codespell)...")
 
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		if where.Is("codespell") == "" {
-			log.Err("codespell not found in PATH")
-			return
+			return []string{"codespell not found in PATH"}
 		}
 
 		cmd = []string{"codespell", "-d", "-f"}
 		if len(ignore) > 0 {
 			cmd = append(cmd, "-L", strings.Join(ignore, ","))
 		}
+
 		skip = append(skip, ".git", "*.pem", "go.mod", "go.sum")
 		cmd = append(cmd, "-S", strings.Join(skip, ","))
 
-		runOutput(cmd, true)
+		return run(cmd)
 	// case "windows":
 	// TODO find spellcheck tool for windows (codespell?)
 	default:
-		log.Errf("unsupported OS: %s", runtime.GOOS)
+		return []string{
+			hl.Sprintf("unsupported OS: %s", runtime.GOOS),
+		}
 	}
 }
 
 // StaticCheck will perform static analysis on all packages.
-func StaticCheck(src ...map[string][]string) {
+func StaticCheck(src ...map[string][]string) []string {
 	var cmd []string
-
-	info("Running static analysis (staticcheck)...")
+	var out []string
 
 	if len(src) > 0 {
 		for i := range src {
@@ -252,12 +266,14 @@ func StaticCheck(src ...map[string][]string) {
 					cmd = append(cmd, filepath.Join(dir, file))
 				}
 
-				runOutput(cmd, true, 0)
+				out = append(out, run(cmd, 0)...)
 			}
 		}
-	} else {
-		runOutput([]string{"staticcheck", "./..."}, true, 0)
+
+		return out
 	}
+
+	return run([]string{"staticcheck", "./..."}, 0)
 }
 
 // UpdateInstall will install the newest versions of the underlying
@@ -283,7 +299,7 @@ func UpdateInstall() {
 	info("Installing newest versions of each tool...")
 	for _, tool := range tools {
 		subInfof("%s...", tool[0])
-		runOutput(append(cmd, tool[1]+"@latest"), false)
+		run(append(cmd, tool[1]+"@latest"))
 	}
 
 	switch runtime.GOOS {
