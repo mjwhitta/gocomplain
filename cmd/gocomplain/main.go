@@ -62,6 +62,8 @@ func isOS(arg string) (bool, []string) {
 func isTool(arg string) (bool, []string) {
 	switch arg {
 	case "at", "alltools":
+		lineLength = true
+		spell = true
 		return true, all
 	case "cyclo", "gocyclo":
 		return true, []string{"gocyclo"}
@@ -127,7 +129,7 @@ func main() {
 		oses = append(oses, runtime.GOOS)
 	}
 
-	if len(tools) == 0 {
+	if !(lineLength || spell) && len(tools) == 0 {
 		lineLength = true
 		spell = true
 		tools = append(tools, all...)
