@@ -237,7 +237,11 @@ func SpellCheck(
 
 		cmd = []string{"codespell", "-d", "-f"}
 		if len(ignore) > 0 {
-			cmd = append(cmd, "-L", strings.Join(ignore, ","))
+			cmd = append(
+				cmd,
+				"-L",
+				strings.ToLower(strings.Join(ignore, ",")),
+			)
 		}
 
 		skip = append(skip, ".git", "*.pem", "go.mod", "go.sum")
