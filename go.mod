@@ -1,6 +1,6 @@
 module github.com/mjwhitta/gocomplain
 
-go 1.21.6
+go 1.19
 
 require (
 	github.com/mjwhitta/cli v1.12.2
