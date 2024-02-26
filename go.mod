@@ -7,7 +7,7 @@ require (
 	github.com/mjwhitta/hilighter v1.11.7
 	github.com/mjwhitta/log v1.6.7
 	github.com/mjwhitta/pathname v1.2.5
-	github.com/mjwhitta/where v1.2.10
+	github.com/mjwhitta/where v1.3.0
 )
 
 require (
