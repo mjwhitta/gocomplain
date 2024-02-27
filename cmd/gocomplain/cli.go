@@ -197,8 +197,8 @@ func validate() {
 	// Validate cli flags
 	if flags.length < 70 {
 		log.ErrX(InvalidOption, "Less than 70? Who hurt you?")
-	} else if flags.length > 80 {
-		log.ErrX(InvalidOption, "Greater than 80? You monster!")
+	} else if flags.length > 100 {
+		log.ErrX(InvalidOption, "Greater than 100? You monster!")
 	}
 
 	// Short circuit, if version was requested
