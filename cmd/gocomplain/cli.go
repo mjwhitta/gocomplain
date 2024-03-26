@@ -73,20 +73,22 @@ func init() {
 	)
 	cli.Section(
 		"ACTIONS - ENV",
-		"allos\nCheck all supported GOOS.\n\n",
+		"dlw\nCheck all supported GOOS.\n\n",
 		"darwin, linux, windows (default: "+runtime.GOOS+")\n",
 		"Check the specified GOOS.\n\n",
-		"ao, d, l, w\nShorthand for associated GOOS.",
+		"d, l, w\nShorthand for associated GOOS.",
 	)
 	cli.Section(
 		"ACTIONS - TOOLS",
-		"alltools (default)\nRun all tools.\n\n",
+		"all (default)\nRun all tools.\n\n",
 		"gocyclo, gofmt, gofumpt, golint, govet, ineffassign,",
 		"line-length, spellcheck, staticheck\n",
 		"Run the specified tool.\n\n",
-		"at, cyclo, fmt, fumpt, lint, vet, ineff, ll, spell, static",
+		"cyclo, fmt, fumpt, lint, vet, ineff, ll, spell, static",
 		"\n",
-		"Shorthand for associated tools.",
+		"Shorthand for associated tools.\n\n",
+		"no*\n",
+		"Prepend tool name with \"no\" to disable that tool.",
 	)
 	cli.SeeAlso = []string{
 		"codespell",
@@ -162,7 +164,8 @@ func init() {
 		&flags.skip,
 		"s",
 		"skip",
-		"Skip directories/files when checking spelling.",
+		"Skip directories/files (accepts globs) when checking",
+		"spelling.",
 	)
 	cli.Flag(
 		&flags.verbose,

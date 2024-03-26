@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/mjwhitta/cli"
 	"github.com/mjwhitta/gocomplain"
@@ -19,13 +20,14 @@ var (
 		"ineffassign",
 		"golint",
 		"govet",
+		"line-length",
+		"spellcheck",
 		"staticcheck",
 	}
-	inMod      bool
-	lineLength bool
-	oses       []string
-	spell      bool
-	tools      []string
+	inMod bool
+	oses  []string
+	rm    []string
+	tools []string
 )
 
 func infof(str string, args ...any) {
@@ -46,10 +48,10 @@ func isCmd(arg string) bool {
 
 func isOS(arg string) (bool, []string) {
 	switch arg {
-	case "ao", "allos":
-		return true, []string{"darwin", "linux", "windows"}
 	case "d", "darwin":
 		return true, []string{"darwin"}
+	case "dlw":
+		return true, []string{"darwin", "linux", "windows"}
 	case "l", "linux":
 		return true, []string{"linux"}
 	case "w", "windows":
@@ -59,11 +61,40 @@ func isOS(arg string) (bool, []string) {
 	return false, nil
 }
 
+func isRemove(arg string) (bool, string) {
+	if !strings.HasPrefix(arg, "no") {
+		return false, ""
+	}
+
+	arg = strings.TrimPrefix(arg, "no")
+
+	switch arg {
+	case "cyclo", "gocyclo":
+		return true, "gocyclo"
+	case "fmt", "gofmt":
+		return true, "gofmt"
+	case "fumpt", "gofumpt":
+		return true, "gofumpt"
+	case "golint", "lint":
+		return true, "golint"
+	case "govet", "vet":
+		return true, "govet"
+	case "ineff", "ineffassign":
+		return true, "ineffassign"
+	case "ll", "line-length":
+		return true, "line-length"
+	case "spell", "spellcheck":
+		return true, "spellcheck"
+	case "static", "staticcheck":
+		return true, "staticcheck"
+	}
+
+	return false, ""
+}
+
 func isTool(arg string) (bool, []string) {
 	switch arg {
-	case "at", "alltools":
-		lineLength = true
-		spell = true
+	case "all":
 		return true, all
 	case "cyclo", "gocyclo":
 		return true, []string{"gocyclo"}
@@ -78,11 +109,9 @@ func isTool(arg string) (bool, []string) {
 	case "ineff", "ineffassign":
 		return true, []string{"ineffassign"}
 	case "ll", "line-length":
-		lineLength = true
-		return true, []string{}
+		return true, []string{"line-length"}
 	case "spell", "spellcheck":
-		spell = true
-		return true, []string{}
+		return true, []string{"spellcheck"}
 	case "static", "staticcheck":
 		return true, []string{"staticcheck"}
 	}
@@ -118,6 +147,8 @@ func main() {
 			os.Exit(Good)
 		} else if ok, add := isOS(arg); ok {
 			oses = append(oses, add...)
+		} else if ok, add := isRemove(arg); ok {
+			rm = append(rm, add)
 		} else if ok, add := isTool(arg); ok {
 			tools = append(tools, add...)
 		} else {
@@ -129,13 +160,20 @@ func main() {
 		oses = append(oses, runtime.GOOS)
 	}
 
-	if !(lineLength || spell) && len(tools) == 0 {
-		lineLength = true
-		spell = true
+	if len(tools) == 0 {
 		tools = append(tools, all...)
 	}
 
-	src, tests = gocomplain.FindSrcFiles(flags.prune...)
+	for i := range rm {
+		for j := range tools {
+			if tools[j] == rm[i] {
+				tools = append(tools[:j], tools[j+1:]...)
+				break
+			}
+		}
+	}
+
+	src, tests = gocomplain.FindSrcFiles(".", flags.prune...)
 	run(src, tests)
 
 	if !flags.quiet {
@@ -150,49 +188,20 @@ func output(out []string) {
 }
 
 func run(src ...map[string][]string) {
+	var lineLength bool
+	var spellcheck bool
+
 	for _, goos := range oses {
 		infof("Setting GOOS to %s", goos)
 		os.Setenv("GOOS", goos)
 
-		for _, tool := range tools {
-			switch tool {
-			case "gocyclo":
-				subInfof("Checking code complexity (gocyclo)...")
-				output(gocomplain.GoCyclo(flags.over))
-			case "gofmt":
-				subInfof("Formatting code (gofmt)...")
-				output(gocomplain.GoFmt())
-			case "gofumpt":
-				subInfof("Optimizing code (gofumpt)...")
-				output(gocomplain.GoFumpt())
-			case "golint":
-				subInfof("Linting code (golint)...")
-				output(gocomplain.GoLint(flags.confidence))
-			case "govet":
-				subInfof("Vetting code (go vet)...")
-				if inMod {
-					output(gocomplain.GoVet())
-				} else {
-					output(gocomplain.GoVet(src...))
-				}
-			case "ineffassign":
-				subInfof(
-					"Looking for inefficient assignments (%s)...",
-					tool,
-				)
-				if inMod {
-					output(gocomplain.IneffAssign())
-				} else {
-					output(gocomplain.IneffAssign(src...))
-				}
-			case "staticcheck":
-				subInfof("Running static analysis (staticcheck)...")
-				if inMod {
-					output(gocomplain.StaticCheck())
-				} else {
-					output(gocomplain.StaticCheck(src...))
-				}
-			}
+		if ll, spell := runOS(src...); ll && spell {
+			lineLength = true
+			spellcheck = true
+		} else if ll {
+			lineLength = true
+		} else if spell {
+			spellcheck = true
 		}
 	}
 
@@ -201,7 +210,7 @@ func run(src ...map[string][]string) {
 		output(gocomplain.LineLength(flags.length, src...))
 	}
 
-	if spell {
+	if spellcheck {
 		os.Setenv("GOOS", runtime.GOOS)
 
 		infof("Checking spelling (misspell)...")
@@ -212,6 +221,58 @@ func run(src ...map[string][]string) {
 			gocomplain.SpellCheck(flags.ignore, flags.skip, src...),
 		)
 	}
+}
+
+func runOS(src ...map[string][]string) (bool, bool) {
+	var lineLength bool
+	var spellcheck bool
+
+	for _, tool := range tools {
+		switch tool {
+		case "gocyclo":
+			subInfof("Checking code complexity (gocyclo)...")
+			output(gocomplain.GoCyclo(flags.over))
+		case "gofmt":
+			subInfof("Formatting code (gofmt)...")
+			output(gocomplain.GoFmt())
+		case "gofumpt":
+			subInfof("Optimizing code (gofumpt)...")
+			output(gocomplain.GoFumpt())
+		case "golint":
+			subInfof("Linting code (golint)...")
+			output(gocomplain.GoLint(flags.confidence))
+		case "govet":
+			subInfof("Vetting code (go vet)...")
+			if inMod {
+				output(gocomplain.GoVet())
+			} else {
+				output(gocomplain.GoVet(src...))
+			}
+		case "ineffassign":
+			subInfof(
+				"Looking for inefficient assignments (%s)...",
+				tool,
+			)
+			if inMod {
+				output(gocomplain.IneffAssign())
+			} else {
+				output(gocomplain.IneffAssign(src...))
+			}
+		case "line-length":
+			lineLength = true
+		case "spellcheck":
+			spellcheck = true
+		case "staticcheck":
+			subInfof("Running static analysis (staticcheck)...")
+			if inMod {
+				output(gocomplain.StaticCheck())
+			} else {
+				output(gocomplain.StaticCheck(src...))
+			}
+		}
+	}
+
+	return lineLength, spellcheck
 }
 
 func setup() (bool, error) {

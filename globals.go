@@ -42,4 +42,4 @@ var pkgMgrs = [][]string{
 var Quiet bool
 
 // Version is the package version.
-const Version = "0.6.8"
+const Version string = "0.7.0"

@@ -14,18 +14,19 @@ import (
 	"github.com/mjwhitta/where"
 )
 
-// FindSrcFiles will recursively traverse the current working
-// directory and return a list of Go source files.
+// FindSrcFiles will recursively traverse the provided directory and
+// return a list of Go source files.
 func FindSrcFiles(
-	prune ...string,
+	search string, prune ...string,
 ) (map[string][]string, map[string][]string) {
-	var dir string
 	var src map[string][]string = map[string][]string{}
 	var tests map[string][]string = map[string][]string{}
 
 	filepath.WalkDir(
-		".",
+		search,
 		func(fn string, d fs.DirEntry, e error) error {
+			var dir string
+
 			if e != nil {
 				return nil
 			}
