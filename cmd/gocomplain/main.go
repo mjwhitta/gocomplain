@@ -130,6 +130,7 @@ func main() {
 	}()
 
 	var e error
+	var other map[string][]string
 	var src map[string][]string
 	var tests map[string][]string
 
@@ -173,8 +174,8 @@ func main() {
 		}
 	}
 
-	src, tests = gocomplain.FindSrcFiles(".", flags.prune...)
-	run(src, tests)
+	src, tests, other = gocomplain.FindSrcFiles(".", flags.prune...)
+	run(src, tests, other)
 
 	if !flags.quiet {
 		log.Good("Done")
@@ -195,7 +196,7 @@ func run(src ...map[string][]string) {
 		infof("Setting GOOS to %s", goos)
 		os.Setenv("GOOS", goos)
 
-		if ll, spell := runOS(src...); ll && spell {
+		if ll, spell := runOS(src[:2]...); ll && spell {
 			lineLength = true
 			spellcheck = true
 		} else if ll {
@@ -207,14 +208,14 @@ func run(src ...map[string][]string) {
 
 	if lineLength {
 		infof("Checking for improper line-length...")
-		output(gocomplain.LineLength(flags.length, src...))
+		output(gocomplain.LineLength(flags.length, src[:2]...))
 	}
 
 	if spellcheck {
 		os.Setenv("GOOS", runtime.GOOS)
 
 		infof("Checking spelling (misspell)...")
-		output(gocomplain.Misspell(flags.ignore))
+		output(gocomplain.Misspell(flags.ignore, src...))
 
 		infof("Checking spelling (codespell)...")
 		output(

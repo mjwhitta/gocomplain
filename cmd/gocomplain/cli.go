@@ -165,7 +165,7 @@ func init() {
 		"s",
 		"skip",
 		"Skip directories/files (accepts globs) when checking",
-		"spelling.",
+		"spelling (not used by misspell).",
 	)
 	cli.Flag(
 		&flags.verbose,

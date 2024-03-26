@@ -18,7 +18,8 @@ import (
 // return a list of Go source files.
 func FindSrcFiles(
 	search string, prune ...string,
-) (map[string][]string, map[string][]string) {
+) (map[string][]string, map[string][]string, map[string][]string) {
+	var other map[string][]string = map[string][]string{}
 	var src map[string][]string = map[string][]string{}
 	var tests map[string][]string = map[string][]string{}
 
@@ -32,6 +33,10 @@ func FindSrcFiles(
 			}
 
 			if d.IsDir() {
+				if d.Name() == ".git" {
+					return filepath.SkipDir
+				}
+
 				for _, p := range prune {
 					if p == d.Name() {
 						return filepath.SkipDir
@@ -44,6 +49,10 @@ func FindSrcFiles(
 			dir = filepath.Dir(fn)
 			fn = d.Name()
 
+			if alwaysIgnore.MatchString(fn) {
+				return nil
+			}
+
 			for _, p := range prune {
 				if p == fn {
 					return nil
@@ -54,13 +63,15 @@ func FindSrcFiles(
 				tests[dir] = append(tests[dir], fn)
 			} else if strings.HasSuffix(fn, ".go") {
 				src[dir] = append(src[dir], fn)
+			} else {
+				other[dir] = append(other[dir], fn)
 			}
 
 			return nil
 		},
 	)
 
-	return src, tests
+	return src, tests, other
 }
 
 // GoCyclo will analyze the provided Go source files for any functions
@@ -211,16 +222,32 @@ func LineLength(threshold uint, src ...map[string][]string) []string {
 }
 
 // Misspell will look for spelling errors in provided Go source files.
-func Misspell(ignore []string) []string {
+func Misspell(ignore []string, src ...map[string][]string) []string {
 	var cmd []string = []string{"misspell"}
+	var out []string
+	var tmp []string
 
 	if len(ignore) > 0 {
 		cmd = append(cmd, "-i", strings.Join(ignore, ","))
 	}
 
-	cmd = append(cmd, ".")
+	if len(src) > 0 {
+		for i := range src {
+			for dir, files := range src[i] {
+				tmp = []string{}
 
-	return run(cmd)
+				for _, file := range files {
+					tmp = append(tmp, filepath.Join(dir, file))
+				}
+
+				out = append(out, run(append(cmd, tmp...))...)
+			}
+		}
+
+		return out
+	}
+
+	return run(append(cmd, "."))
 }
 
 // SpellCheck will run the appropriate tool for the current OS and
@@ -245,7 +272,31 @@ func SpellCheck(
 			)
 		}
 
-		skip = append(skip, ".git", "*.pem", "go.mod", "go.sum")
+		skip = append(
+			skip,
+			".git*",
+			"*.db",
+			"*.der",
+			"*.dll",
+			"*.exe",
+			"*.drawio",
+			"*.exe",
+			"*.gif",
+			"*.gz",
+			"*.jar",
+			"*.jpeg",
+			"*.jpg",
+			"*.pdf",
+			"*.pem",
+			"*.png",
+			"*.so",
+			"*.tar",
+			"*.tgz",
+			"*.xz",
+			"*.zip",
+			"go.mod",
+			"go.sum",
+		)
 		cmd = append(cmd, "-S", strings.Join(skip, ","))
 
 		return run(cmd)

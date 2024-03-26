@@ -9,6 +9,12 @@ import (
 var Debug bool
 
 var (
+	alwaysIgnore *regexp.Regexp = regexp.MustCompile("" +
+		`\.git*|.*\.(` +
+		`db|der|dll|drawio|exe|gif|gz|jar|jpeg|jpg|pdf|pem|png|so` +
+		`tar|tgz|xz|zip` +
+		`)`,
+	)
 	generated *regexp.Regexp = regexp.MustCompile(
 		`^//\sCode\sgenerated\s.*\sDO\sNOT\sEDIT\.$`,
 	)
@@ -42,4 +48,4 @@ var pkgMgrs = [][]string{
 var Quiet bool
 
 // Version is the package version.
-const Version string = "0.7.0"
+const Version string = "0.8.0"
