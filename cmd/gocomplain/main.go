@@ -135,6 +135,7 @@ func main() {
 	var tests map[string][]string
 
 	validate()
+	processConfig()
 
 	gocomplain.Debug = flags.debug
 	gocomplain.Quiet = flags.quiet
@@ -185,6 +186,50 @@ func main() {
 func output(out []string) {
 	for _, ln := range out {
 		log.Warn(ln)
+	}
+}
+
+func processConfig() {
+	if flags.confidence == 0.8 {
+		if tmp, e := config.MustGetFloat64("confidence"); e == nil {
+			flags.confidence = tmp
+		}
+	}
+
+	if tmp, e := config.MustGetStringArray("ignore"); e == nil {
+		for i := range tmp {
+			flags.ignore = append(flags.ignore, tmp[i])
+		}
+	}
+
+	if flags.length == 70 {
+		if tmp, e := config.MustGetUint("length"); e == nil {
+			flags.length = tmp
+		}
+	}
+
+	if flags.over == 15 {
+		if tmp, e := config.MustGetUint("over"); e == nil {
+			flags.over = tmp
+		}
+	}
+
+	if tmp, e := config.MustGetStringArray("prune"); e == nil {
+		for i := range tmp {
+			flags.prune = append(flags.prune, tmp[i])
+		}
+	}
+
+	if !flags.quiet {
+		if tmp, e := config.MustGetBool("quiet"); e == nil {
+			flags.quiet = tmp
+		}
+	}
+
+	if tmp, e := config.MustGetStringArray("skip"); e == nil {
+		for i := range tmp {
+			flags.skip = append(flags.skip, tmp[i])
+		}
 	}
 }
 

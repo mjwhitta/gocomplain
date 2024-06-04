@@ -62,7 +62,8 @@ func init() {
 		"gofmt, gofumpt, golint, go vet, ineffassign, line-length",
 		"verification, spellcheck, and staticcheck. The spellcheck",
 		"functionality uses the misspell Go module as well as",
-		"codespell on Linux and macOS.",
+		"codespell on Linux and macOS. Any provided CLI flags will",
+		"override defaults in ~/.config/gocomplain/rc.",
 	)
 	cli.Section(
 		"ACTIONS - COMMANDS",
