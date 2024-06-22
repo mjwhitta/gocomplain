@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"runtime"
 	"strings"
 
 	"github.com/mjwhitta/cli"
@@ -65,31 +64,36 @@ func init() {
 		"codespell on Linux and macOS. Any provided CLI flags will",
 		"override defaults in ~/.config/gocomplain/rc.",
 	)
-	cli.Section(
+	cli.SectionAligned(
 		"ACTIONS - COMMANDS",
-		"h, help\nDisplay this help message.\n\n",
-		"i, install, u, update, upgrade\n",
-		"Install or reinstall underlying tools.\n\n",
-		"v, version\nShow version.",
+		"|",
+		"help, h|Display this help message.\n",
+		"install, i|Install underlying tools.\n",
+		"update, upgrade, u|Reinstall underlying tools.\n",
+		"version, v|Show version.",
 	)
-	cli.Section(
+	cli.SectionAligned(
 		"ACTIONS - ENV",
-		"dlw\nCheck all supported GOOS.\n\n",
-		"darwin, linux, windows (default: "+runtime.GOOS+")\n",
-		"Check the specified GOOS.\n\n",
-		"d, l, w\nShorthand for associated GOOS.",
+		"|",
+		"dlw|Check all supported GOOS.\n",
+		"darwin, d|Set GOOS to darwin.\n",
+		"linux, l|Set GOOS to linux.\n",
+		"windows, w|Set GOOS to windows.",
 	)
-	cli.Section(
+	cli.SectionAligned(
 		"ACTIONS - TOOLS",
-		"all (default)\nRun all tools.\n\n",
-		"gocyclo, gofmt, gofumpt, golint, govet, ineffassign,",
-		"line-length, spellcheck, staticheck\n",
-		"Run the specified tool.\n\n",
-		"cyclo, fmt, fumpt, lint, vet, ineff, ll, spell, static",
-		"\n",
-		"Shorthand for associated tools.\n\n",
-		"no*\n",
-		"Prepend tool name with \"no\" to disable that tool.",
+		"|",
+		"all|Run all tools (default).\n",
+		"gocyclo, cyclo|Run gocyclo.\n",
+		"gofmt, fmt|Run gofmt.\n",
+		"gofumpt, fumpt|Run gofumpt.\n",
+		"golint, lint|Run golint.\n",
+		"govet, vet|Run govet.\n",
+		"ineffassign, ineff|Run ineffassign.\n",
+		"line-length, ll|Check source code line-length.\n",
+		"no*|Prepend tool name with \"no\" to disable that tool.\n",
+		"spellcheck, spell|Run spellchecker.\n",
+		"staticcheck, static|Run staticcheck.",
 	)
 	cli.SeeAlso = []string{
 		"codespell",

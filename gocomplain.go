@@ -23,7 +23,7 @@ func FindSrcFiles(
 	var src map[string][]string = map[string][]string{}
 	var tests map[string][]string = map[string][]string{}
 
-	filepath.WalkDir(
+	_ = filepath.WalkDir(
 		search,
 		func(fn string, d fs.DirEntry, e error) error {
 			var dir string

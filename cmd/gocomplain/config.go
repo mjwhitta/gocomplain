@@ -7,13 +7,13 @@ var config *jsoncfg.JSONCfg
 func init() {
 	// Initialize default values for config
 	config = jsoncfg.New("~/.config/gocomplain/rc")
-	config.SetDefault(0.8, "confidence")
-	config.SetDefault([]string{}, "ignore")
-	config.SetDefault(70, "length")
-	config.SetDefault(15, "over")
-	config.SetDefault([]string{}, "prune")
-	config.SetDefault(false, "quiet")
-	config.SetDefault([]string{}, "skip")
-	config.SaveDefault()
-	config.Reset()
+	_ = config.SetDefault(0.8, "confidence")
+	_ = config.SetDefault([]string{}, "ignore")
+	_ = config.SetDefault(70, "length")
+	_ = config.SetDefault(15, "over")
+	_ = config.SetDefault([]string{}, "prune")
+	_ = config.SetDefault(false, "quiet")
+	_ = config.SetDefault([]string{}, "skip")
+	_ = config.SaveDefault()
+	_ = config.Reset()
 }
