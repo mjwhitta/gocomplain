@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// CGO will turn on CGO support.
+var CGO bool
+
 // Debug will turn on debug log messages.
 var Debug bool
 
@@ -48,4 +51,4 @@ var pkgMgrs = [][]string{
 var Quiet bool
 
 // Version is the package version.
-const Version string = "0.9.1"
+const Version string = "0.9.2"

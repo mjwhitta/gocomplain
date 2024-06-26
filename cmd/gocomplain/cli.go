@@ -23,6 +23,7 @@ const (
 
 // Flags
 var flags struct {
+	cgo        bool
 	confidence float64
 	debug      bool
 	ignore     cli.StringList
@@ -109,6 +110,12 @@ func init() {
 	cli.Title = "GoComplain"
 
 	// Parse cli flags
+	cli.Flag(
+		&flags.cgo,
+		"cgo",
+		false,
+		"Set environment variables for CGO support.",
+	)
 	cli.Flag(
 		&flags.confidence,
 		"c",

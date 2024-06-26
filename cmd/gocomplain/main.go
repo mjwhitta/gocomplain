@@ -137,6 +137,7 @@ func main() {
 	validate()
 	processConfig()
 
+	gocomplain.CGO = flags.cgo
 	gocomplain.Debug = flags.debug
 	gocomplain.Quiet = flags.quiet
 
@@ -240,6 +241,16 @@ func run(src ...map[string][]string) {
 	for _, goos := range oses {
 		infof("Setting GOOS to %s", goos)
 		os.Setenv("GOOS", goos)
+
+		if flags.cgo {
+			switch goos {
+			case "windows":
+				os.Setenv("CC", "x86_64-w64-mingw32-gcc")
+			default:
+				os.Setenv("CC", "")
+			}
+			os.Setenv("CGO_ENABLED", "1")
+		}
 
 		if ll, spell := runOS(src[:2]...); ll && spell {
 			lineLength = true
