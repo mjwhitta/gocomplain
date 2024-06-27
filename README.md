@@ -29,8 +29,7 @@ tools. Currently supported functionality includes:
 Open a terminal and run the following:
 
 ```
-$ go install --ldflags "-s -w" --trimpath \
-    github.com/mjwhitta/gocomplain/cmd/gocomplain@latest
+$ go install github.com/mjwhitta/gocomplain/cmd/gocomplain@latest
 ```
 
 ## Usage
