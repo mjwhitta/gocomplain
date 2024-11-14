@@ -8,8 +8,7 @@ import (
 	"path/filepath"
 )
 
-// Config is the gocomplain config structure.
-type Config struct {
+type config struct {
 	Confidence float64  `json:"confidence"`
 	Ignore     []string `json:"ignore"`
 	Length     uint     `json:"length"`
@@ -19,7 +18,7 @@ type Config struct {
 	Skip       []string `json:"skip"`
 }
 
-var config *Config
+var cfg *config
 
 func init() {
 	var b []byte
@@ -27,15 +26,15 @@ func init() {
 	var fn string
 
 	if fn, e = os.UserConfigDir(); e != nil {
-		panic(fmt.Errorf("user has no config directory: %w", e))
+		panic(fmt.Errorf("user has no cfg directory: %w", e))
 	}
 
 	fn = filepath.Join(fn, "gocomplain", "rc")
 	b, e = os.ReadFile(fn)
 
 	if (e != nil) || (len(bytes.TrimSpace(b)) == 0) {
-		// Default config
-		config = &Config{
+		// Default cfg
+		cfg = &config{
 			Confidence: 0.8,
 			Ignore:     []string{},
 			Length:     70,
@@ -44,7 +43,7 @@ func init() {
 			Skip:       []string{},
 		}
 
-		b, _ = json.MarshalIndent(&config, "", "  ")
+		b, _ = json.MarshalIndent(&cfg, "", "  ")
 
 		if e = os.MkdirAll(filepath.Dir(fn), 0o700); e != nil {
 			e = fmt.Errorf(
@@ -59,32 +58,32 @@ func init() {
 			panic(fmt.Errorf("failed to write %s: %w", fn, e))
 		}
 	} else {
-		if e = json.Unmarshal(b, &config); e != nil {
-			panic(fmt.Errorf("invalid config: %w", e))
+		if e = json.Unmarshal(b, &cfg); e != nil {
+			panic(fmt.Errorf("invalid cfg: %w", e))
 		}
 	}
 
-	if config.Confidence == 0 {
-		config.Confidence = 0.8
+	if cfg.Confidence == 0 {
+		cfg.Confidence = 0.8
 	}
 
-	if config.Ignore == nil {
-		config.Ignore = []string{}
+	if cfg.Ignore == nil {
+		cfg.Ignore = []string{}
 	}
 
-	if config.Length == 0 {
-		config.Length = 70
+	if cfg.Length == 0 {
+		cfg.Length = 70
 	}
 
-	if config.Over == 0 {
-		config.Over = 15
+	if cfg.Over == 0 {
+		cfg.Over = 15
 	}
 
-	if config.Prune == nil {
-		config.Prune = []string{}
+	if cfg.Prune == nil {
+		cfg.Prune = []string{}
 	}
 
-	if config.Skip == nil {
-		config.Skip = []string{}
+	if cfg.Skip == nil {
+		cfg.Skip = []string{}
 	}
 }

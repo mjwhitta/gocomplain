@@ -63,7 +63,7 @@ func init() {
 		"verification, spellcheck, and staticcheck. The spellcheck",
 		"functionality uses the misspell Go module as well as",
 		"codespell on Linux and macOS. Any provided CLI flags will",
-		"override defaults in ~/.config/gocomplain/rc.",
+		"override values in ~/.config/gocomplain/rc.",
 	)
 	cli.SectionAligned(
 		"ACTIONS - COMMANDS",

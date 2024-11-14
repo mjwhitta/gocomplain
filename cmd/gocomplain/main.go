@@ -192,28 +192,28 @@ func output(out []string) {
 
 func processConfig() {
 	if flags.confidence == 0.8 {
-		flags.confidence = config.Confidence
+		flags.confidence = cfg.Confidence
 	}
 
-	for _, ignore := range config.Ignore {
+	for _, ignore := range cfg.Ignore {
 		flags.ignore = append(flags.ignore, ignore)
 	}
 
 	if flags.length == 70 {
-		flags.length = config.Length
+		flags.length = cfg.Length
 	}
 
 	if flags.over == 15 {
-		flags.over = config.Over
+		flags.over = cfg.Over
 	}
 
-	for _, prune := range config.Prune {
+	for _, prune := range cfg.Prune {
 		flags.prune = append(flags.prune, prune)
 	}
 
-	flags.quiet = flags.quiet || config.Quiet
+	flags.quiet = flags.quiet || cfg.Quiet
 
-	for _, skip := range config.Skip {
+	for _, skip := range cfg.Skip {
 		flags.skip = append(flags.skip, skip)
 	}
 }
