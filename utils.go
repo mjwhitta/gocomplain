@@ -1,6 +1,7 @@
 package gocomplain
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,7 +14,6 @@ import (
 func execute(cmd []string) (string, error) {
 	var b []byte
 	var e error
-	var tmp string
 
 	if len(cmd) == 0 {
 		return "", nil
@@ -26,9 +26,10 @@ func execute(cmd []string) (string, error) {
 	if b, e = exec.Command(cmd[0], cmd[1:]...).Output(); e != nil {
 		switch e := e.(type) {
 		case *exec.ExitError:
-			tmp = strings.TrimSpace(string(e.Stderr))
-			if tmp != "" {
-				return "", fmt.Errorf(tmp)
+			if b = bytes.TrimSpace(b); len(b) == 0 {
+				if b = bytes.TrimSpace(e.Stderr); len(b) > 0 {
+					return "", fmt.Errorf("%s", b)
+				}
 			}
 		default:
 			return "", fmt.Errorf("failed to read cmd output: %w", e)

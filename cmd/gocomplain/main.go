@@ -192,45 +192,29 @@ func output(out []string) {
 
 func processConfig() {
 	if flags.confidence == 0.8 {
-		if tmp, e := config.MustGetFloat64("confidence"); e == nil {
-			flags.confidence = tmp
-		}
+		flags.confidence = config.Confidence
 	}
 
-	if tmp, e := config.MustGetStringArray("ignore"); e == nil {
-		for i := range tmp {
-			flags.ignore = append(flags.ignore, tmp[i])
-		}
+	for _, ignore := range config.Ignore {
+		flags.ignore = append(flags.ignore, ignore)
 	}
 
 	if flags.length == 70 {
-		if tmp, e := config.MustGetUint("length"); e == nil {
-			flags.length = tmp
-		}
+		flags.length = config.Length
 	}
 
 	if flags.over == 15 {
-		if tmp, e := config.MustGetUint("over"); e == nil {
-			flags.over = tmp
-		}
+		flags.over = config.Over
 	}
 
-	if tmp, e := config.MustGetStringArray("prune"); e == nil {
-		for i := range tmp {
-			flags.prune = append(flags.prune, tmp[i])
-		}
+	for _, prune := range config.Prune {
+		flags.prune = append(flags.prune, prune)
 	}
 
-	if !flags.quiet {
-		if tmp, e := config.MustGetBool("quiet"); e == nil {
-			flags.quiet = tmp
-		}
-	}
+	flags.quiet = flags.quiet || config.Quiet
 
-	if tmp, e := config.MustGetStringArray("skip"); e == nil {
-		for i := range tmp {
-			flags.skip = append(flags.skip, tmp[i])
-		}
+	for _, skip := range config.Skip {
+		flags.skip = append(flags.skip, skip)
 	}
 }
 
