@@ -2,8 +2,6 @@ module github.com/mjwhitta/gocomplain
 
 go 1.22
 
-toolchain go1.23.6
-
 require (
 	github.com/mjwhitta/cli v1.12.7
 	github.com/mjwhitta/hilighter v1.11.11
