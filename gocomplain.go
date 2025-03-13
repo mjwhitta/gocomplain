@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -37,10 +38,8 @@ func FindSrcFiles(
 					return filepath.SkipDir
 				}
 
-				for _, p := range prune {
-					if p == d.Name() {
-						return filepath.SkipDir
-					}
+				if slices.Contains(prune, d.Name()) {
+					return filepath.SkipDir
 				}
 
 				return nil
@@ -53,10 +52,8 @@ func FindSrcFiles(
 				return nil
 			}
 
-			for _, p := range prune {
-				if p == fn {
-					return nil
-				}
+			if slices.Contains(prune, fn) {
+				return nil
 			}
 
 			if strings.HasSuffix(fn, "_test.go") {
@@ -189,6 +186,10 @@ func LineLength(threshold uint, src ...map[string][]string) []string {
 					}
 
 					if strings.HasPrefix(line, "//go:") {
+						continue
+					}
+
+					if structTags.MatchString(line) {
 						continue
 					}
 

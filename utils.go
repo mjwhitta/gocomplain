@@ -59,7 +59,7 @@ func run(cmd []string) []string {
 	// Exit, if no usable output
 	if stdout == "" {
 		return nil
-	} else if rIgnoredErr.MatchString(stdout) {
+	} else if ignoredErr.MatchString(stdout) {
 		return nil
 	}
 
