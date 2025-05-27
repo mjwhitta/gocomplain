@@ -330,7 +330,13 @@ func StaticCheck(src ...map[string][]string) []string {
 		return out
 	}
 
-	return run([]string{"staticcheck", "./..."})
+	return run(
+		[]string{
+			"staticcheck",
+			"--checks=all,-ST1000,-ST1023",
+			"./...",
+		},
+	)
 }
 
 // UpdateInstall will install the newest versions of the underlying
