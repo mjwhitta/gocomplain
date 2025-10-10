@@ -30,6 +30,7 @@ Open a terminal and run the following:
 
 ```
 $ go install github.com/mjwhitta/gocomplain/cmd/gocomplain@latest
+$ gocomplain install
 ```
 
 ## Usage
