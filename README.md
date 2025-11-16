@@ -7,6 +7,8 @@
 
 ## What is this?
 
+**DEPRECATED:** Use [golangci-lint] instead.
+
 This module attempts to combine multiple other Go source analyzing
 tools. Currently supported functionality includes:
 
@@ -38,3 +40,5 @@ $ gocomplain install
 Run `gocomplain -h` to see the full usage, but you can safely run
 `gocomplain` to get started analyzing, while using the default
 settings.
+
+[golangci-lint]: https://golangci-lint.run
